@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Studio Artha — MIS Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --brand-primary: #32509F;
+  --brand-light: #DDE6FF;
+  --brand-accent: #F77F00;
+  --brand-dark: #1a2d5a;
+  --brand-surface: #f0f4ff;
+  --bg-main: #F5F7FB;
+  --bg-card: #FFFFFF;
+  --text-primary: #1a1f36;
+  --text-secondary: #5a6178;
+  --text-muted: #8b93a7;
+  --border-color: #e2e8f0;
+  --success: #10b981;
+  --success-bg: #ecfdf5;
+  --warning: #f59e0b;
+  --warning-bg: #fffbeb;
+  --danger: #ef4444;
+  --danger-bg: #fef2f2;
+  --info: #3b82f6;
+  --info-bg: #eff6ff;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+  --shadow-lg: 0 8px 30px rgba(0,0,0,0.12);
+  --shadow-xl: 0 20px 60px rgba(0,0,0,0.15);
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg-main);color:var(--text-primary);min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+
+/* ─── LOGIN ─── */
+#loginPage{display:flex;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(135deg,#0a1628 0%,#0f1f45 40%,#1a2d5a 100%);position:relative;overflow:hidden}
+#loginPage::before{content:'';position:absolute;top:-30%;right:-20%;width:60%;height:80%;background:radial-gradient(ellipse,rgba(247,127,0,0.06)0%,transparent 70%);pointer-events:none}
+#loginPage::after{content:'';position:absolute;bottom:-15%;left:-15%;width:50%;height:50%;background:radial-gradient(ellipse,rgba(50,80,159,0.1)0%,transparent 70%);pointer-events:none}
+.login-container{width:100%;max-width:380px;padding:2rem 1.5rem;position:relative;z-index:2;text-align:center}
+.login-logo{margin-bottom:2.5rem}
+.login-logo img{height:72px;width:auto;object-fit:contain;filter:drop-shadow(0 4px 12px rgba(0,0,0,0.3))}
+.login-card{background:rgba(255,255,255,0.05);backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,0.08);border-radius:var(--radius-xl);padding:2rem 1.8rem}
+.form-group{margin-bottom:1.4rem;text-align:left}
+.form-group label{display:block;color:rgba(255,255,255,0.55);font-size:0.75rem;font-weight:500;margin-bottom:0.45rem;letter-spacing:0.5px;text-transform:uppercase}
+.input-wrap{position:relative}
+.input-wrap input{width:100%;padding:0.8rem 1rem;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:var(--radius-sm);color:#fff;font-family:'DM Sans',sans-serif;font-size:0.92rem;transition:var(--transition);outline:none}
+.input-wrap input::placeholder{color:rgba(255,255,255,0.25)}
+.input-wrap input:focus{border-color:var(--brand-accent);background:rgba(255,255,255,0.1);box-shadow:0 0 0 3px rgba(247,127,0,0.12)}
+.toggle-pw{position:absolute;right:0.8rem;top:50%;transform:translateY(-50%);background:none;border:none;color:rgba(255,255,255,0.4);cursor:pointer;font-size:1.05rem;padding:0.2rem;transition:color 0.2s}
+.toggle-pw:hover{color:rgba(255,255,255,0.8)}
+.login-btn{width:100%;padding:0.85rem;background:var(--brand-accent);color:#fff;border:none;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:0.92rem;font-weight:600;letter-spacing:0.3px;cursor:pointer;transition:var(--transition);margin-top:0.4rem}
+.login-btn:hover{background:#e06f00;transform:translateY(-1px);box-shadow:0 6px 20px rgba(247,127,0,0.3)}
+.login-btn:active{transform:translateY(0)}
+.login-error{display:none;color:#ff6b6b;font-size:0.8rem;margin-top:1rem;padding:0.55rem 0.8rem;background:rgba(255,107,107,0.1);border-radius:var(--radius-sm);border:1px solid rgba(255,107,107,0.15)}
+
+/* ─── APP LAYOUT ─── */
+#appContainer{display:none;min-height:100vh}
+.top-nav{background:linear-gradient(135deg,var(--brand-dark) 0%,var(--brand-primary) 100%);padding:0 1.5rem;height:58px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,0.15)}
+.nav-left{display:flex;align-items:center;gap:0.7rem}
+.nav-left img{height:32px;width:auto}
+.nav-center{display:flex;gap:0.2rem;background:rgba(255,255,255,0.08);border-radius:var(--radius-sm);padding:0.2rem}
+.nav-tab{padding:0.45rem 1rem;color:rgba(255,255,255,0.55);font-size:0.8rem;font-weight:500;border:none;background:none;border-radius:6px;cursor:pointer;transition:var(--transition);font-family:'DM Sans',sans-serif;white-space:nowrap}
+.nav-tab:hover{color:rgba(255,255,255,0.9);background:rgba(255,255,255,0.06)}
+.nav-tab.active{background:var(--brand-accent);color:#fff;font-weight:600}
+.nav-right{display:flex;align-items:center;gap:0.8rem}
+.nav-date{color:rgba(221,230,255,0.6);font-size:0.75rem;font-family:'JetBrains Mono',monospace}
+.nav-user{display:flex;align-items:center;gap:0.45rem;cursor:pointer;padding:0.3rem 0.65rem 0.3rem 0.4rem;border-radius:20px;background:rgba(255,255,255,0.08);transition:var(--transition);border:none;font-family:'DM Sans',sans-serif}
+.nav-user:hover{background:rgba(255,255,255,0.15)}
+.nav-avatar{width:28px;height:28px;border-radius:50%;background:var(--brand-accent);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:0.7rem}
+.nav-user span{color:rgba(255,255,255,0.8);font-size:0.8rem}
+.hamburger{display:none;background:none;border:none;cursor:pointer;padding:0.4rem}
+.hamburger span{display:block;width:20px;height:2px;background:#fff;margin:4px 0;transition:var(--transition)}
+
+/* User dropdown */
+.user-dropdown{display:none;position:absolute;top:53px;right:1.5rem;background:var(--bg-card);border-radius:var(--radius-sm);box-shadow:var(--shadow-lg);border:1px solid var(--border-color);z-index:101;min-width:200px;overflow:hidden}
+.user-dropdown.show{display:block}
+.user-dropdown a{display:flex;align-items:center;gap:0.6rem;padding:0.7rem 1rem;color:var(--text-primary);text-decoration:none;font-size:0.84rem;transition:background 0.2s;cursor:pointer}
+.user-dropdown a:hover{background:var(--brand-surface)}
+.user-dropdown a.danger{color:var(--danger)}
+.dd-divider{height:1px;background:var(--border-color);margin:0.2rem 0}
+
+/* ─── CONTENT ─── */
+.content-area{padding:1.5rem;max-width:1440px;margin:0 auto}
+.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:0.5rem}
+.page-header h1{font-size:1.4rem;font-weight:700}
+.page-header h1 small{font-size:0.73rem;color:var(--text-muted);font-weight:400;display:block;margin-top:0.1rem}
+.breadcrumb{display:flex;align-items:center;gap:0.4rem;font-size:0.8rem;color:var(--text-muted)}
+.breadcrumb a{color:var(--brand-primary);text-decoration:none;cursor:pointer;font-weight:500}
+.breadcrumb a:hover{text-decoration:underline}
+
+/* ─── KPI CARDS ─── */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:1rem;margin-bottom:1.5rem}
+.kpi-card{background:var(--bg-card);border-radius:var(--radius-md);padding:1.1rem 1.2rem;box-shadow:var(--shadow-sm);border:1px solid var(--border-color);transition:var(--transition);position:relative;overflow:hidden}
+.kpi-card:hover{box-shadow:var(--shadow-md);transform:translateY(-2px)}
+.kpi-card::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;border-radius:4px 0 0 4px}
+.kpi-card.blue::before{background:var(--brand-primary)}
+.kpi-card.green::before{background:var(--success)}
+.kpi-card.orange::before{background:var(--brand-accent)}
+.kpi-card.red::before{background:var(--danger)}
+.kpi-card.purple::before{background:#8b5cf6}
+.kpi-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.7rem}
+.kpi-label{font-size:0.72rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.4px;font-weight:500}
+.kpi-icon{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1rem}
+.kpi-value{font-family:'JetBrains Mono',monospace;font-size:1.5rem;font-weight:700;line-height:1.2}
+.kpi-sub{display:flex;align-items:center;gap:0.4rem;margin-top:0.4rem;font-size:0.75rem}
+.kpi-sub .planned{color:var(--text-muted)}
+.kpi-sub .actual-up{color:var(--success);font-weight:600}
+.kpi-sub .actual-down{color:var(--danger);font-weight:600}
+
+/* ─── FUND CARDS ─── */
+.funds-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:1rem;margin-bottom:1.5rem}
+.fund-card{background:var(--bg-card);border-radius:var(--radius-md);padding:0.9rem 1.1rem;box-shadow:var(--shadow-sm);border:1px solid var(--border-color);display:flex;align-items:center;gap:0.8rem;transition:var(--transition)}
+.fund-card:hover{box-shadow:var(--shadow-md);transform:translateY(-1px)}
+.fund-icon{width:42px;height:42px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0}
+.fund-icon.bank{background:linear-gradient(135deg,#dbeafe,#bfdbfe);color:var(--brand-primary)}
+.fund-icon.cash{background:linear-gradient(135deg,#d1fae5,#a7f3d0);color:#059669}
+.fund-icon.petty{background:linear-gradient(135deg,#fef3c7,#fde68a);color:#b45309}
+.fund-icon.total{background:linear-gradient(135deg,var(--brand-light),#c7d2fe);color:var(--brand-primary)}
+.fund-details{flex:1}
+.fund-label{font-size:0.72rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.3px;font-weight:500}
+.fund-amount{font-family:'JetBrains Mono',monospace;font-size:1.15rem;font-weight:700}
+
+/* ─── MAIN GRID ─── */
+.dash-grid{display:grid;grid-template-columns:1fr;gap:1.5rem;margin-bottom:1.5rem}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-top:1.5rem}
+
+/* ─── CARD ─── */
+.card{background:var(--bg-card);border-radius:var(--radius-md);box-shadow:var(--shadow-sm);border:1px solid var(--border-color);overflow:hidden}
+.card-header{display:flex;align-items:center;justify-content:space-between;padding:0.9rem 1.2rem;border-bottom:1px solid var(--border-color)}
+.card-header h3{font-size:0.88rem;font-weight:600;display:flex;align-items:center;gap:0.4rem}
+.card-body{padding:1rem 1.2rem}
+.card-body.no-pad{padding:0}
+
+/* ─── TABLE ─── */
+.table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.data-table{width:100%;border-collapse:collapse;font-size:0.82rem}
+.data-table thead th{padding:0.65rem 0.75rem;background:var(--brand-surface);color:var(--text-secondary);font-weight:600;font-size:0.7rem;text-transform:uppercase;letter-spacing:0.4px;border-bottom:2px solid var(--border-color);text-align:left;white-space:nowrap;position:sticky;top:0}
+.data-table tbody tr{border-bottom:1px solid #f1f5f9;transition:background 0.2s;cursor:pointer}
+.data-table tbody tr:hover{background:var(--brand-surface)}
+.data-table tbody tr.total-row{background:#f8fafc;font-weight:700;cursor:default;border-top:2px solid var(--border-color)}
+.data-table tbody tr.total-row:hover{background:#f8fafc}
+.data-table tbody td{padding:0.65rem 0.75rem;vertical-align:middle}
+.mono{font-family:'JetBrains Mono',monospace;font-size:0.8rem;font-weight:500}
+.text-right{text-align:right}
+
+/* ─── BADGES ─── */
+.health-badge{display:inline-flex;align-items:center;gap:0.25rem;padding:0.22rem 0.65rem;border-radius:20px;font-size:0.7rem;font-weight:600;white-space:nowrap}
+.health-badge.green{background:var(--success-bg);color:#065f46}
+.health-badge.yellow{background:var(--warning-bg);color:#92400e}
+.health-badge.red{background:var(--danger-bg);color:#991b1b}
+.health-badge.blue{background:var(--info-bg);color:#1e40af}
+.phase-badge{display:inline-block;padding:0.18rem 0.55rem;border-radius:6px;font-size:0.7rem;font-weight:600;background:var(--brand-light);color:var(--brand-primary);white-space:nowrap}
+.info-btn{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:#f1f5f9;border:1px solid var(--border-color);color:var(--text-muted);font-size:0.7rem;font-weight:700;cursor:pointer;transition:var(--transition);margin-left:0.3rem;position:relative;font-style:italic;font-family:Georgia,serif}
+.info-btn:hover{background:var(--brand-light);color:var(--brand-primary);border-color:var(--brand-primary)}
+
+/* ─── INFO TOOLTIP ─── */
+.tooltip-box{display:none;position:absolute;bottom:calc(100% + 8px);right:-10px;background:var(--text-primary);color:#fff;padding:0.7rem 0.9rem;border-radius:var(--radius-sm);font-size:0.75rem;font-weight:400;font-style:normal;font-family:'DM Sans',sans-serif;width:260px;line-height:1.5;box-shadow:var(--shadow-lg);z-index:50}
+.tooltip-box::after{content:'';position:absolute;top:100%;right:16px;border:6px solid transparent;border-top-color:var(--text-primary)}
+.info-btn:hover .tooltip-box{display:block}
+
+/* ─── PROGRESS ─── */
+.progress-bar{width:100%;height:5px;background:#e2e8f0;border-radius:3px;overflow:hidden;margin-top:0.2rem}
+.progress-fill{height:100%;border-radius:3px;transition:width 0.8s ease}
+
+/* ─── SIDEBAR REMINDERS ─── */
+.reminder-item{display:flex;align-items:flex-start;gap:0.7rem;padding:0.7rem 0;border-bottom:1px solid #f1f5f9}
+.reminder-item:last-child{border-bottom:none}
+.reminder-dot{width:7px;height:7px;border-radius:50%;margin-top:5px;flex-shrink:0}
+.reminder-dot.overdue{background:var(--danger)}
+.reminder-dot.due-soon{background:var(--warning)}
+.reminder-dot.upcoming{background:var(--info)}
+.reminder-text{flex:1}
+.reminder-text .name{font-size:0.8rem;font-weight:600}
+.reminder-text .detail{font-size:0.72rem;color:var(--text-muted);margin-top:0.1rem}
+.reminder-amount{font-family:'JetBrains Mono',monospace;font-size:0.8rem;font-weight:600;white-space:nowrap}
+
+/* ─── PROJECT HERO ─── */
+.project-hero{background:linear-gradient(135deg,var(--brand-dark) 0%,var(--brand-primary) 100%);border-radius:var(--radius-lg);padding:1.4rem 1.8rem;color:#fff;margin-bottom:1.5rem;position:relative;overflow:hidden}
+.project-hero::after{content:'';position:absolute;top:-50%;right:-20%;width:50%;height:200%;background:radial-gradient(ellipse,rgba(247,127,0,0.08)0%,transparent 70%)}
+.project-hero-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1rem;position:relative;z-index:1}
+.project-hero h2{font-size:1.3rem;font-weight:700}
+.project-hero .project-id{font-size:0.75rem;color:rgba(255,255,255,0.55);margin-top:0.15rem;font-family:'JetBrains Mono',monospace}
+.project-hero .phase-big{background:rgba(247,127,0,0.2);border:1px solid rgba(247,127,0,0.35);color:var(--brand-accent);padding:0.35rem 0.9rem;border-radius:var(--radius-sm);font-size:0.78rem;font-weight:600}
+.project-hero-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:0.8rem;position:relative;z-index:1}
+.hero-stat{text-align:center;padding:0.7rem;background:rgba(255,255,255,0.07);border-radius:var(--radius-sm)}
+.hero-stat .label{font-size:0.68rem;color:rgba(255,255,255,0.45);text-transform:uppercase;letter-spacing:0.4px}
+.hero-stat .value{font-family:'JetBrains Mono',monospace;font-size:1.05rem;font-weight:700;margin-top:0.25rem}
+
+/* ─── CLICKABLE ─── */
+.clickable{cursor:pointer}
+.clickable:hover{box-shadow:var(--shadow-md);transform:translateY(-2px)}
+
+/* ─── MODAL ─── */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);z-index:200;justify-content:center;align-items:center;padding:1rem}
+.modal-overlay.show{display:flex}
+.modal-content{background:var(--bg-card);border-radius:var(--radius-lg);width:100%;max-width:650px;max-height:80vh;overflow-y:auto;box-shadow:var(--shadow-xl)}
+.modal-header{display:flex;align-items:center;justify-content:space-between;padding:1.1rem 1.4rem;border-bottom:1px solid var(--border-color);position:sticky;top:0;background:var(--bg-card);z-index:1}
+.modal-header h3{font-size:0.95rem;font-weight:600}
+.modal-close{width:30px;height:30px;border-radius:50%;border:none;background:#f1f5f9;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1rem;color:var(--text-secondary);transition:var(--transition)}
+.modal-close:hover{background:#e2e8f0}
+.modal-body{padding:1.4rem}
+.chart-container{position:relative;width:100%;max-width:240px;margin:0 auto 1rem}
+.chart-container canvas{width:100%!important;height:auto!important}
+.tag-list{margin-top:0.8rem}
+.tag-item{display:flex;align-items:center;justify-content:space-between;padding:0.5rem 0;border-bottom:1px solid #f1f5f9}
+.tag-item:last-child{border-bottom:none}
+.tag-color{width:9px;height:9px;border-radius:3px;flex-shrink:0}
+.tag-name{flex:1;margin-left:0.5rem;font-size:0.8rem}
+.tag-amount{font-family:'JetBrains Mono',monospace;font-size:0.8rem;font-weight:600}
+.tag-pct{font-size:0.7rem;color:var(--text-muted);width:38px;text-align:right}
+
+/* ─── PROFILE MODAL ─── */
+.profile-card{padding:1.5rem}
+.profile-field{margin-bottom:1.2rem}
+.profile-field label{display:block;font-size:0.75rem;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:0.4rem}
+.profile-field input{width:100%;padding:0.7rem 0.9rem;border:1px solid var(--border-color);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:0.9rem;transition:var(--transition);outline:none}
+.profile-field input:focus{border-color:var(--brand-primary);box-shadow:0 0 0 3px rgba(50,80,159,0.1)}
+.save-btn{padding:0.7rem 1.8rem;background:var(--brand-primary);color:#fff;border:none;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:0.88rem;font-weight:600;cursor:pointer;transition:var(--transition)}
+.save-btn:hover{background:var(--brand-dark)}
+.save-msg{display:none;color:var(--success);font-size:0.82rem;margin-top:0.8rem;font-weight:500}
+
+/* ─── RESPONSIVE ─── */
+@media(max-width:1024px){
+  .nav-center{display:none}
+  .nav-center.mobile-show{display:flex;flex-direction:column;position:absolute;top:58px;left:0;right:0;background:var(--brand-dark);padding:0.5rem;box-shadow:var(--shadow-lg);z-index:99}
+  .hamburger{display:block}
+  .nav-date{display:none}
+  .two-col{grid-template-columns:1fr}
+}
+@media(max-width:768px){
+  .content-area{padding:1rem}
+  .kpi-grid{grid-template-columns:repeat(2,1fr);gap:0.7rem}
+  .funds-grid{grid-template-columns:repeat(2,1fr);gap:0.7rem}
+  .kpi-value{font-size:1.15rem}
+  .fund-amount{font-size:0.95rem}
+  .page-header h1{font-size:1.15rem}
+  .project-hero{padding:1rem 1.1rem}
+  .project-hero-stats{grid-template-columns:repeat(2,1fr)}
+  .hero-stat .value{font-size:0.9rem}
+  .data-table{font-size:0.74rem}
+  .nav-user span{display:none}
+  .two-col{grid-template-columns:1fr}
+}
+@media(max-width:480px){
+  .kpi-grid{grid-template-columns:1fr 1fr}
+  .funds-grid{grid-template-columns:1fr 1fr}
+  .kpi-card{padding:0.8rem 0.9rem}
+  .kpi-icon{display:none}
+  .fund-icon{width:36px;height:36px;font-size:1rem}
+  .login-container{padding:1.5rem 1rem}
+  .login-logo img{height:56px}
+}
+
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:#94a3b8}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.animate-in{animation:fadeInUp 0.35s ease forwards}
+.d1{animation-delay:.04s;opacity:0}.d2{animation-delay:.08s;opacity:0}.d3{animation-delay:.12s;opacity:0}.d4{animation-delay:.16s;opacity:0}.d5{animation-delay:.2s;opacity:0}
+</style>
+</head>
+<body>
+
+<!-- ═══ LOGIN ═══ -->
+<div id="loginPage">
+  <div class="login-container">
+    <div class="login-logo">
+      <img src="https://lh3.googleusercontent.com/d/1EU3bDNOF58gFDMpMv6OoYDOLTur2EIOj" alt="MakeEazy" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQwIiBoZWlnaHQ9IjcyIiB2aWV3Qm94PSIwIDAgMjQwIDcyIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMzYiIGN5PSIzNiIgcj0iMzIiIGZpbGw9IiNEREU2RkYiLz48cmVjdCB4PSIxNiIgeT0iMjgiIHdpZHRoPSI4IiBoZWlnaHQ9IjIwIiByeD0iMiIgZmlsbD0iIzMyNTA5RiIvPjxyZWN0IHg9IjI2IiB5PSIyMiIgd2lkdGg9IjgiIGhlaWdodD0iMjYiIHJ4PSIyIiBmaWxsPSIjMzI1MDlGIi8+PHJlY3QgeD0iMzYiIHk9IjE2IiB3aWR0aD0iOCIgaGVpZ2h0PSIzMiIgcng9IjIiIGZpbGw9IiMzMjUwOUYiLz48cmVjdCB4PSI0NiIgeT0iMTIiIHdpZHRoPSI4IiBoZWlnaHQ9IjM2IiByeD0iMiIgZmlsbD0iIzMyNTA5RiIvPjx0ZXh0IHg9Ijc4IiB5PSI0NCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXdlaWdodD0iNzAwIiBmb250LXNpemU9IjI4IiBmaWxsPSIjRjc3RjAwIiBsZXR0ZXItc3BhY2luZz0iMyI+TUFLRSBFQVPZPC90ZXh0Pjwvc3ZnPg=='">
+    </div>
+    <div class="login-card">
+      <form id="loginForm" onsubmit="return handleLogin(event)">
+        <div class="form-group">
+          <label>Username</label>
+          <div class="input-wrap">
+            <input type="text" id="username" placeholder="Enter username" autocomplete="username" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <div class="input-wrap">
+            <input type="password" id="password" placeholder="Enter password" autocomplete="current-password" required>
+            <button type="button" class="toggle-pw" onclick="togglePassword()">👁</button>
+          </div>
+        </div>
+        <button type="submit" class="login-btn">Sign In</button>
+        <div class="login-error" id="loginError">Invalid username or password.</div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ APP ═══ -->
+<div id="appContainer">
+  <nav class="top-nav">
+    <div class="nav-left">
+      <button class="hamburger" onclick="toggleMobileMenu()"><span></span><span></span><span></span></button>
+      <img src="https://lh3.googleusercontent.com/d/1EU3bDNOF58gFDMpMv6OoYDOLTur2EIOj" alt="MakeEazy" style="height:30px" onerror="this.style.display='none'">
+    </div>
+    <div class="nav-center" id="navTabs">
+      <button class="nav-tab active" onclick="showPage('dashboard')">Dashboard</button>
+      <button class="nav-tab" onclick="showPage('projects')">Projects</button>
+      <button class="nav-tab" onclick="showPage('vendors')">Vendors</button>
+      <button class="nav-tab" onclick="showPage('receivables')">Receivables</button>
+    </div>
+    <div class="nav-right">
+      <span class="nav-date">31-Jan-2025</span>
+      <button class="nav-user" onclick="toggleUserMenu()">
+        <div class="nav-avatar">SA</div>
+        <span>Studio Artha</span>
+      </button>
+    </div>
+    <div class="user-dropdown" id="userDropdown">
+      <a onclick="openProfileModal()">👤 Update Login</a>
+      <div class="dd-divider"></div>
+      <a class="danger" onclick="handleLogout()">🚪 Sign Out</a>
+    </div>
+  </nav>
+  <div id="page-dashboard" class="content-area"></div>
+  <div id="page-projects" class="content-area" style="display:none"></div>
+  <div id="page-project-detail" class="content-area" style="display:none"></div>
+  <div id="page-vendors" class="content-area" style="display:none"></div>
+  <div id="page-receivables" class="content-area" style="display:none"></div>
+</div>
+
+<!-- Tag Modal -->
+<div class="modal-overlay" id="tagModal">
+  <div class="modal-content">
+    <div class="modal-header"><h3 id="tagModalTitle">Breakdown</h3><button class="modal-close" onclick="closeModal('tagModal')">✕</button></div>
+    <div class="modal-body" id="tagModalBody"></div>
+  </div>
+</div>
+<!-- Profile Modal -->
+<div class="modal-overlay" id="profileModal">
+  <div class="modal-content" style="max-width:420px">
+    <div class="modal-header"><h3>🔐 Update Login Credentials</h3><button class="modal-close" onclick="closeModal('profileModal')">✕</button></div>
+    <div class="modal-body">
+      <div class="profile-card">
+        <div class="profile-field"><label>Username</label><input type="text" id="profUser" value=""></div>
+        <div class="profile-field"><label>New Password</label><input type="password" id="profPass" placeholder="Enter new password"></div>
+        <div class="profile-field"><label>Confirm Password</label><input type="password" id="profPassConfirm" placeholder="Confirm new password"></div>
+        <button class="save-btn" onclick="saveCredentials()">Update Credentials</button>
+        <div class="save-msg" id="saveMsg">✓ Credentials updated successfully!</div>
+        <div class="save-msg" id="saveErr" style="color:var(--danger)">Passwords do not match.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+/* ══════════════════════════════════════════
+   DATA (aligned with Google Sheet SA_MIS)
+   ══════════════════════════════════════════ */
+const PHASES={1:'Discovery & Proposal',2:'Design & Approval',3:'Internal Estimates',4:'Procurement & Execution',5:'Finishing & MEP',6:'Handover & Closure'};
+
+const FUND={bank:847500,bankName:'HDFC Current A/c',cash:450000,petty:54000,asOn:'31-Jan-2025'};
+
+const PROJECTS=[
+  {id:'SA-2024-001',name:'Sunrise Villa',client:'Mr. Sharma',type:'Residential',location:'Jubilee Hills',
+   contractValue:2200000,phase:6,completion:98,status:'green',statusText:'On Track',
+   startDate:'2024-04-15',endDate:'2025-01-20',
+   plannedPhaseReceipt:2200000,actualReceipt:2315000,
+   plannedPhaseExp:1626000,actualExp:1951200,pctExpComplete:16.67,
+   incomeBreakdown:[
+     {tag:'Design Fee',amount:220000,color:'#32509F'},{tag:'Civil Work',amount:680000,color:'#F77F00'},
+     {tag:'Carpentry',amount:520000,color:'#10b981'},{tag:'Electrical',amount:380000,color:'#8b5cf6'},
+     {tag:'Painting',amount:290000,color:'#ec4899'},{tag:'Furniture & Decor',amount:225000,color:'#06b6d4'}
+   ],
+   expenseBreakdown:[
+     {tag:'Civil Contractor',amount:545000,color:'#32509F'},{tag:'Carpenter',amount:495000,color:'#F77F00'},
+     {tag:'Electrician',amount:348000,color:'#10b981'},{tag:'Painter',amount:235000,color:'#8b5cf6'},
+     {tag:'Material',amount:218200,color:'#ec4899'},{tag:'Design Team',amount:72000,color:'#06b6d4'},{tag:'Misc',amount:38000,color:'#f59e0b'}
+   ],
+   phaseWise:[
+     {phase:1,estR:0,actR:0,estE:22000,actE:18500},{phase:2,estR:330000,actR:330000,estE:154000,actE:148000},
+     {phase:3,estR:0,actR:0,estE:22000,actE:19500},{phase:4,estR:770000,actR:845000,estE:612500,actE:698000},
+     {phase:5,estR:880000,actR:920000,estE:663500,actE:862700},{phase:6,estR:220000,actR:220000,estE:152000,actE:204500}
+   ]},
+  {id:'SA-2024-002',name:'TechNova Office',client:'TechNova Pvt Ltd',type:'Commercial',location:'HITEC City',
+   contractValue:5800000,phase:5,completion:72,status:'yellow',statusText:'Caution',
+   startDate:'2024-06-01',endDate:'2025-04-30',
+   plannedPhaseReceipt:5800000,actualReceipt:5825000,
+   plannedPhaseExp:4655000,actualExp:4189500,pctExpComplete:-11.11,
+   incomeBreakdown:[
+     {tag:'Design Fee',amount:580000,color:'#32509F'},{tag:'Civil & Structural',amount:1620000,color:'#F77F00'},
+     {tag:'MEP Works',amount:1050000,color:'#10b981'},{tag:'Modular Furniture',amount:1275000,color:'#8b5cf6'},
+     {tag:'Flooring & Ceiling',amount:850000,color:'#ec4899'},{tag:'AV & IT',amount:450000,color:'#06b6d4'}
+   ],
+   expenseBreakdown:[
+     {tag:'Civil Contractor',amount:1280000,color:'#32509F'},{tag:'MEP Vendor',amount:820000,color:'#F77F00'},
+     {tag:'Furniture Vendor',amount:985000,color:'#10b981'},{tag:'Flooring',amount:425000,color:'#8b5cf6'},
+     {tag:'Design Team',amount:210000,color:'#ec4899'},{tag:'AV Integrator',amount:310000,color:'#06b6d4'},{tag:'Misc',amount:159500,color:'#f59e0b'}
+   ],
+   phaseWise:[
+     {phase:1,estR:0,actR:0,estE:58000,actE:52000},{phase:2,estR:870000,actR:870000,estE:464000,actE:445000},
+     {phase:3,estR:0,actR:0,estE:58000,actE:48000},{phase:4,estR:2030000,actR:2030000,estE:1856000,actE:1520000},
+     {phase:5,estR:1450000,actR:1475000,estE:1610000,actE:1584500},{phase:6,estR:1450000,actR:1450000,estE:609000,actE:540000}
+   ]},
+  {id:'SA-2024-003',name:'Luxe Boutique',client:'Luxe Fashion Pvt Ltd',type:'Retail',location:'Banjara Hills',
+   contractValue:9200000,phase:4,completion:45,status:'red',statusText:'At Risk',
+   startDate:'2024-08-10',endDate:'2025-07-15',
+   plannedPhaseReceipt:9200000,actualReceipt:8835000,
+   plannedPhaseExp:4856000,actualExp:5341600,pctExpComplete:9.09,
+   incomeBreakdown:[
+     {tag:'Design Fee',amount:920000,color:'#32509F'},{tag:'Civil & Structure',amount:2840000,color:'#F77F00'},
+     {tag:'Display Units',amount:2080000,color:'#10b981'},{tag:'Lighting',amount:1290000,color:'#8b5cf6'},
+     {tag:'Flooring',amount:960000,color:'#ec4899'},{tag:'Branding',amount:745000,color:'#06b6d4'}
+   ],
+   expenseBreakdown:[
+     {tag:'Civil Contractor',amount:2020000,color:'#32509F'},{tag:'Display Fabricator',amount:1280000,color:'#F77F00'},
+     {tag:'Lighting Vendor',amount:680000,color:'#10b981'},{tag:'Flooring',amount:480000,color:'#8b5cf6'},
+     {tag:'Design Team',amount:381600,color:'#ec4899'},{tag:'Material+Transport',amount:500000,color:'#f59e0b'}
+   ],
+   phaseWise:[
+     {phase:1,estR:0,actR:0,estE:92000,actE:85000},{phase:2,estR:1380000,actR:1380000,estE:736000,actE:710000},
+     {phase:3,estR:0,actR:0,estE:92000,actE:88000},{phase:4,estR:3220000,actR:3155000,estE:2576000,actE:3158600},
+     {phase:5,estR:2300000,actR:2300000,estE:1012000,actE:1000000},{phase:6,estR:2300000,actR:2000000,estE:348000,actE:300000}
+   ]},
+  {id:'SA-2024-004',name:'Greenview Apartment',client:'Mr. & Mrs. Kumar',type:'Residential',location:'Gachibowli',
+   contractValue:3500000,phase:2,completion:12,status:'blue',statusText:'In Design',
+   startDate:'2024-12-01',endDate:'2025-09-30',
+   plannedPhaseReceipt:3500000,actualReceipt:1795000,
+   plannedPhaseExp:104000,actualExp:88400,pctExpComplete:-17.65,
+   incomeBreakdown:[
+     {tag:'Design Fee',amount:350000,color:'#32509F'},{tag:'Consultation',amount:245000,color:'#F77F00'},
+     {tag:'Site Survey',amount:200000,color:'#10b981'},{tag:'Advance',amount:1000000,color:'#8b5cf6'}
+   ],
+   expenseBreakdown:[
+     {tag:'Design Team',amount:52000,color:'#32509F'},{tag:'3D Visualization',amount:18000,color:'#F77F00'},
+     {tag:'Site Visit',amount:10400,color:'#10b981'},{tag:'Software',amount:5000,color:'#8b5cf6'},{tag:'Misc',amount:3000,color:'#f59e0b'}
+   ],
+   phaseWise:[
+     {phase:1,estR:0,actR:0,estE:35000,actE:22000},{phase:2,estR:525000,actR:1795000,estE:69000,actE:66400},
+     {phase:3,estR:0,actR:0,estE:35000,actE:0},{phase:4,estR:1225000,actR:0,estE:1120000,actE:0},
+     {phase:5,estR:1050000,actR:0,estE:1050000,actE:0},{phase:6,estR:700000,actR:0,estE:315000,actE:0}
+   ]}
+];
+
+const VENDOR_DUES=[
+  {name:'Sri Sai Constructions',project:'Luxe Boutique',amount:485000,dueDate:'2025-01-28',status:'overdue'},
+  {name:'Modern Tiles & Stones',project:'Luxe Boutique',amount:268000,dueDate:'2025-01-20',status:'overdue'},
+  {name:'Steel Fab Pvt Ltd',project:'Luxe Boutique',amount:340000,dueDate:'2025-01-25',status:'overdue'},
+  {name:'Hyderabad Electricals',project:'TechNova Office',amount:312000,dueDate:'2025-02-10',status:'due-soon'},
+  {name:'Creative Woodworks',project:'Sunrise Villa',amount:145000,dueDate:'2025-02-15',status:'due-soon'},
+  {name:'Raghav Plumbing Works',project:'TechNova Office',amount:95000,dueDate:'2025-02-20',status:'upcoming'},
+  {name:'AV Solutions India',project:'TechNova Office',amount:185000,dueDate:'2025-02-18',status:'upcoming'},
+  {name:'Decor World',project:'Sunrise Villa',amount:72000,dueDate:'2025-03-01',status:'upcoming'}
+];
+
+const RECEIVABLES=[
+  {client:'TechNova Pvt Ltd',project:'TechNova Office',invoice:'INV-002-018',amount:850000,dueDate:'2025-01-25',aging:6,status:'overdue'},
+  {client:'Luxe Fashion',project:'Luxe Boutique',invoice:'INV-003-012',amount:430000,dueDate:'2025-01-20',aging:11,status:'overdue'},
+  {client:'Mr. Sharma',project:'Sunrise Villa',invoice:'INV-001-024',amount:100000,dueDate:'2025-02-10',aging:0,status:'due-soon'},
+  {client:'Mr. & Mrs. Kumar',project:'Greenview Apt',invoice:'INV-004-003',amount:160000,dueDate:'2025-02-15',aging:0,status:'upcoming'},
+  {client:'Luxe Fashion',project:'Luxe Boutique',invoice:'INV-003-013',amount:580000,dueDate:'2025-02-28',aging:0,status:'upcoming'},
+  {client:'TechNova Pvt Ltd',project:'TechNova Office',invoice:'INV-002-019',amount:320000,dueDate:'2025-02-20',aging:0,status:'upcoming'}
+];
+
+/* ══════ CREDENTIALS (mutable) ══════ */
+let CREDS={user:'studioartha',pass:'mecpl2026'};
+
+/* ══════ UTILS ══════ */
+function fmt(n){const a=Math.abs(n);const s=n<0?'-':'';if(a>=10000000)return s+'₹'+(a/10000000).toFixed(2)+' Cr';if(a>=100000)return s+'₹'+(a/100000).toFixed(2)+' L';return s+'₹'+a.toLocaleString('en-IN')}
+function fS(n){const a=Math.abs(n);const s=n<0?'-':'';if(a>=10000000)return s+(a/10000000).toFixed(1)+'Cr';if(a>=100000)return s+(a/100000).toFixed(1)+'L';return s+a.toLocaleString('en-IN')}
+function pct(a,b){return b?((a/b)*100).toFixed(1):'0.0'}
+function ha(hex,al){const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);return`rgba(${r},${g},${b},${al})`}
+
+function computeHealth(p){
+  // Health based on Est vs Actual for BOTH income and expense
+  const reasons=[];
+  let score=0;
+  // Check up-to-current-phase receipts vs estimates
+  let totEstR=0,totActR=0,totEstE=0,totActE=0;
+  p.phaseWise.forEach(pw=>{
+    if(pw.phase<=p.phase){totEstR+=pw.estR;totActR+=pw.actR;totEstE+=pw.estE;totActE+=pw.actE}
+  });
+  if(totActR<totEstR*0.9){reasons.push('Receipts below estimate: '+fmt(totActR)+' vs '+fmt(totEstR));score+=2}
+  else if(totActR<totEstR){reasons.push('Receipts slightly below estimate');score+=1}
+  if(totActE>totEstE*1.1){reasons.push('Expenses exceed estimate by >10%: '+fmt(totActE)+' vs '+fmt(totEstE));score+=2}
+  else if(totActE>totEstE*1.02){reasons.push('Expenses slightly above estimate');score+=1}
+  const cashPos=totActR-totActE;
+  if(cashPos<0){reasons.push('Negative cash position: '+fmt(cashPos));score+=2}
+  if(reasons.length===0)reasons.push('All metrics within target range');
+  let status='green',text='On Track';
+  if(score>=3){status='red';text='At Risk'}else if(score>=1){status='yellow';text='Caution'}
+  if(p.phase<=2&&score<2){status='blue';text='In Design'}
+  return{status,text,reasons};
+}
+
+/* ══════ AUTH ══════ */
+function handleLogin(e){
+  e.preventDefault();
+  if(document.getElementById('username').value.trim()===CREDS.user&&document.getElementById('password').value===CREDS.pass){
+    document.getElementById('loginPage').style.display='none';
+    document.getElementById('appContainer').style.display='block';
+    renderDashboard();
+  }else{
+    const err=document.getElementById('loginError');err.style.display='block';
+    document.getElementById('password').value='';
+    setTimeout(()=>err.style.display='none',3000);
+  }
+  return false;
+}
+function handleLogout(){
+  document.getElementById('appContainer').style.display='none';
+  document.getElementById('loginPage').style.display='flex';
+  document.getElementById('username').value='';document.getElementById('password').value='';
+  document.getElementById('userDropdown').classList.remove('show');
+}
+function togglePassword(){
+  const p=document.getElementById('password');
+  const b=p.nextElementSibling;
+  if(p.type==='password'){p.type='text';b.textContent='🔒'}else{p.type='password';b.textContent='👁'}
+}
+function toggleUserMenu(){document.getElementById('userDropdown').classList.toggle('show')}
+function toggleMobileMenu(){document.getElementById('navTabs').classList.toggle('mobile-show')}
+document.addEventListener('click',e=>{
+  if(!e.target.closest('.nav-user')&&!e.target.closest('.user-dropdown'))document.getElementById('userDropdown').classList.remove('show');
+  if(!e.target.closest('.hamburger')&&!e.target.closest('.nav-center'))document.getElementById('navTabs').classList.remove('mobile-show');
+});
+
+/* ══════ PROFILE ══════ */
+function openProfileModal(){
+  document.getElementById('userDropdown').classList.remove('show');
+  document.getElementById('profUser').value=CREDS.user;
+  document.getElementById('profPass').value='';
+  document.getElementById('profPassConfirm').value='';
+  document.getElementById('saveMsg').style.display='none';
+  document.getElementById('saveErr').style.display='none';
+  document.getElementById('profileModal').classList.add('show');
+}
+function saveCredentials(){
+  const u=document.getElementById('profUser').value.trim();
+  const p=document.getElementById('profPass').value;
+  const c=document.getElementById('profPassConfirm').value;
+  document.getElementById('saveMsg').style.display='none';
+  document.getElementById('saveErr').style.display='none';
+  if(!u){document.getElementById('saveErr').textContent='Username cannot be empty.';document.getElementById('saveErr').style.display='block';return}
+  if(p&&p!==c){document.getElementById('saveErr').textContent='Passwords do not match.';document.getElementById('saveErr').style.display='block';return}
+  CREDS.user=u;
+  if(p)CREDS.pass=p;
+  document.getElementById('saveMsg').style.display='block';
+  setTimeout(()=>closeModal('profileModal'),1500);
+}
+
+/* ══════ NAV ══════ */
+function showPage(page,data){
+  document.querySelectorAll('.content-area').forEach(el=>el.style.display='none');
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  const tabs=document.querySelectorAll('.nav-tab');
+  if(page==='dashboard'){document.getElementById('page-dashboard').style.display='block';tabs[0].classList.add('active');renderDashboard()}
+  else if(page==='projects'){document.getElementById('page-projects').style.display='block';tabs[1].classList.add('active');renderProjectsList()}
+  else if(page==='project-detail'){document.getElementById('page-project-detail').style.display='block';tabs[1].classList.add('active');renderProjectDetail(data)}
+  else if(page==='vendors'){document.getElementById('page-vendors').style.display='block';tabs[2].classList.add('active');renderVendors()}
+  else if(page==='receivables'){document.getElementById('page-receivables').style.display='block';tabs[3].classList.add('active');renderReceivables()}
+  document.getElementById('navTabs').classList.remove('mobile-show');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ══════ DASHBOARD ══════ */
+function renderDashboard(){
+  const tContract=PROJECTS.reduce((s,p)=>s+p.contractValue,0);
+  const tReceived=PROJECTS.reduce((s,p)=>s+p.actualReceipt,0);
+  const tExpense=PROJECTS.reduce((s,p)=>s+p.actualExp,0);
+  const tPlannedE=PROJECTS.reduce((s,p)=>s+p.plannedPhaseExp,0);
+  const netMargin=tReceived-tExpense;
+  const tAR=RECEIVABLES.reduce((s,r)=>s+r.amount,0);
+  const tVD=VENDOR_DUES.reduce((s,v)=>s+v.amount,0);
+  const fundsTotal=FUND.bank+FUND.cash+FUND.petty;
+
+  const el=document.getElementById('page-dashboard');
+  el.innerHTML=`
+    <div class="page-header animate-in d1"><h1>Business Dashboard<small>as on ${FUND.asOn}</small></h1></div>
+    <div class="kpi-grid">
+      <div class="kpi-card blue animate-in d1"><div class="kpi-header"><span class="kpi-label">Contract Value</span><div class="kpi-icon" style="background:${ha('#32509F',.1)};color:#32509F">📄</div></div><div class="kpi-value">${fmt(tContract)}</div><div class="kpi-sub"><span class="planned">${PROJECTS.length} Active Projects</span></div></div>
+      <div class="kpi-card green animate-in d2"><div class="kpi-header"><span class="kpi-label">Amount Received</span><div class="kpi-icon" style="background:${ha('#10b981',.1)};color:#10b981">💰</div></div><div class="kpi-value">${fmt(tReceived)}</div><div class="kpi-sub"><span class="planned">Collection: ${pct(tReceived,tContract)}%</span></div></div>
+      <div class="kpi-card orange animate-in d3"><div class="kpi-header"><span class="kpi-label">Total Expenses</span><div class="kpi-icon" style="background:${ha('#F77F00',.1)};color:#F77F00">📊</div></div><div class="kpi-value">${fmt(tExpense)}</div><div class="kpi-sub"><span class="planned">Planned: ${fmt(tPlannedE)}</span><span class="${tExpense<=tPlannedE?'actual-up':'actual-down'}">${tExpense<=tPlannedE?'▼':'▲'} ${pct(Math.abs(tExpense-tPlannedE),tPlannedE)}%</span></div></div>
+      <div class="kpi-card ${netMargin>=0?'green':'red'} animate-in d4"><div class="kpi-header"><span class="kpi-label">Net Margin</span><div class="kpi-icon" style="background:${netMargin>=0?ha('#10b981',.1):ha('#ef4444',.1)};color:${netMargin>=0?'#10b981':'#ef4444'}">📈</div></div><div class="kpi-value" style="color:${netMargin>=0?'#10b981':'#ef4444'}">${fmt(netMargin)}</div><div class="kpi-sub"><span class="planned">${pct(netMargin,tReceived)}% of Received</span></div></div>
+      <div class="kpi-card purple animate-in d5"><div class="kpi-header"><span class="kpi-label">Receivables</span><div class="kpi-icon" style="background:${ha('#8b5cf6',.1)};color:#8b5cf6">📥</div></div><div class="kpi-value">${fmt(tAR)}</div><div class="kpi-sub"><span class="planned">${RECEIVABLES.filter(r=>r.status==='overdue').length} overdue</span></div></div>
+    </div>
+    <div class="funds-grid">
+      <div class="fund-card animate-in d2"><div class="fund-icon bank">🏦</div><div class="fund-details"><div class="fund-label">${FUND.bankName}</div><div class="fund-amount">${fmt(FUND.bank)}</div></div></div>
+      <div class="fund-card animate-in d3"><div class="fund-icon cash">💵</div><div class="fund-details"><div class="fund-label">Cash in Hand</div><div class="fund-amount">${fmt(FUND.cash)}</div></div></div>
+      <div class="fund-card animate-in d4"><div class="fund-icon petty">🪙</div><div class="fund-details"><div class="fund-label">Petty Cash</div><div class="fund-amount">${fmt(FUND.petty)}</div></div></div>
+      <div class="fund-card animate-in d5"><div class="fund-icon total">💼</div><div class="fund-details"><div class="fund-label">Total Funds</div><div class="fund-amount" style="color:var(--brand-primary)">${fmt(fundsTotal)}</div></div></div>
+    </div>
+    <!-- Project Table -->
+    <div class="card animate-in d3">
+      <div class="card-header"><h3>📋 Project Status Snapshot</h3><a href="#" onclick="showPage('projects');return false" style="color:var(--brand-primary);font-size:0.8rem;text-decoration:none;font-weight:500">View All →</a></div>
+      <div class="card-body no-pad"><div class="table-scroll">
+        <table class="data-table"><thead><tr><th>Project</th><th>Phase</th><th>Contract</th><th>Progress</th><th>Health</th></tr></thead>
+        <tbody>${PROJECTS.map(p=>{const h=computeHealth(p);return`
+          <tr onclick="showPage('project-detail','${p.id}')">
+            <td><strong>${p.name}</strong><br><span style="font-size:0.7rem;color:var(--text-muted)">${p.client} · ${p.type}</span></td>
+            <td><span class="phase-badge">${PHASES[p.phase]}</span></td>
+            <td class="mono text-right">${fS(p.contractValue)}</td>
+            <td style="min-width:90px"><span style="font-size:0.72rem;color:var(--text-muted)">${p.completion}%</span><div class="progress-bar"><div class="progress-fill" style="width:${p.completion}%;background:${h.status==='green'?'var(--success)':h.status==='yellow'?'var(--warning)':h.status==='red'?'var(--danger)':'var(--info)'}"></div></div></td>
+            <td style="white-space:nowrap"><span class="health-badge ${h.status}">${h.status==='green'?'✅':h.status==='yellow'?'⚠️':h.status==='red'?'🔴':'🔵'} ${h.text}</span><span class="info-btn" onclick="event.stopPropagation()">i<div class="tooltip-box">${h.reasons.map(r=>'• '+r).join('<br>')}</div></span></td>
+          </tr>`}).join('')}</tbody></table>
+      </div></div>
+    </div>
+    <!-- Reminders Row -->
+    <div class="two-col">
+      <div class="card animate-in d4">
+        <div class="card-header"><h3>⚠️ Vendor Dues</h3><a href="#" onclick="showPage('vendors');return false" style="color:var(--brand-primary);font-size:0.8rem;text-decoration:none;font-weight:500">All →</a></div>
+        <div class="card-body">
+          ${VENDOR_DUES.filter(v=>v.status!=='upcoming').map(v=>`<div class="reminder-item"><div class="reminder-dot ${v.status}"></div><div class="reminder-text"><div class="name">${v.name}</div><div class="detail">${v.project} · Due ${v.dueDate}</div></div><div class="reminder-amount" style="color:${v.status==='overdue'?'var(--danger)':'var(--warning)'}">${fmt(v.amount)}</div></div>`).join('')}
+        </div>
+      </div>
+      <div class="card animate-in d5">
+        <div class="card-header"><h3>📥 Receivable Reminders</h3><a href="#" onclick="showPage('receivables');return false" style="color:var(--brand-primary);font-size:0.8rem;text-decoration:none;font-weight:500">All →</a></div>
+        <div class="card-body">
+          ${RECEIVABLES.filter(r=>r.status!=='upcoming').map(r=>`<div class="reminder-item"><div class="reminder-dot ${r.status}"></div><div class="reminder-text"><div class="name">${r.client}</div><div class="detail">${r.project} · ${r.invoice}${r.aging>0?' · '+r.aging+'d overdue':''}</div></div><div class="reminder-amount" style="color:${r.status==='overdue'?'var(--danger)':'var(--warning)'}">${fmt(r.amount)}</div></div>`).join('')}
+        </div>
+      </div>
+    </div>`;
+}
+
+/* ══════ PROJECTS LIST ══════ */
+function renderProjectsList(){
+  const el=document.getElementById('page-projects');
+  el.innerHTML=`
+    <div class="page-header animate-in d1"><h1>All Projects<small>${PROJECTS.length} projects tracked</small></h1><div class="breadcrumb"><a onclick="showPage('dashboard')">Dashboard</a> / Projects</div></div>
+    <div class="card animate-in d2"><div class="card-body no-pad"><div class="table-scroll">
+      <table class="data-table"><thead><tr><th>ID</th><th>Project</th><th>Client</th><th>Type</th><th>Phase</th><th>Contract</th><th>Received</th><th>Expenses</th><th>Margin</th><th>Health</th></tr></thead>
+      <tbody>${PROJECTS.map(p=>{const m=p.actualReceipt-p.actualExp;const h=computeHealth(p);return`
+        <tr onclick="showPage('project-detail','${p.id}')">
+          <td class="mono" style="font-size:0.73rem">${p.id}</td><td><strong>${p.name}</strong></td><td>${p.client}</td>
+          <td><span style="font-size:0.73rem;padding:0.12rem 0.45rem;background:var(--brand-surface);border-radius:4px">${p.type}</span></td>
+          <td><span class="phase-badge">${PHASES[p.phase]}</span></td>
+          <td class="mono text-right">${fmt(p.contractValue)}</td><td class="mono text-right">${fmt(p.actualReceipt)}</td>
+          <td class="mono text-right">${fmt(p.actualExp)}</td>
+          <td class="mono text-right" style="color:${m>=0?'var(--success)':'var(--danger)'}">${fmt(m)}</td>
+          <td><span class="health-badge ${h.status}">${h.text}</span></td>
+        </tr>`}).join('')}</tbody></table>
+    </div></div></div>`;
+}
+
+/* ══════ PROJECT DETAIL ══════ */
+function renderProjectDetail(pid){
+  const p=PROJECTS.find(x=>x.id===pid);if(!p)return;
+  const h=computeHealth(p);const margin=p.actualReceipt-p.actualExp;
+  // Phase totals
+  let totER=0,totAR=0,totEE=0,totAE=0;
+  p.phaseWise.forEach(pw=>{totER+=pw.estR;totAR+=pw.actR;totEE+=pw.estE;totAE+=pw.actE});
+
+  const el=document.getElementById('page-project-detail');
+  el.innerHTML=`
+    <div class="page-header animate-in d1"><div class="breadcrumb"><a onclick="showPage('dashboard')">Dashboard</a> / <a onclick="showPage('projects')">Projects</a> / ${p.name}</div></div>
+    <div class="project-hero animate-in d1">
+      <div class="project-hero-top"><div><h2>${p.name}</h2><div class="project-id">${p.id} · ${p.client} · ${p.location}</div></div><div class="phase-big">Phase ${p.phase}: ${PHASES[p.phase]}</div></div>
+      <div class="project-hero-stats">
+        <div class="hero-stat"><div class="label">Contract</div><div class="value">${fmt(p.contractValue)}</div></div>
+        <div class="hero-stat"><div class="label">Received</div><div class="value" style="color:#4ade80">${fmt(p.actualReceipt)}</div></div>
+        <div class="hero-stat"><div class="label">Expenses</div><div class="value" style="color:#fbbf24">${fmt(p.actualExp)}</div></div>
+        <div class="hero-stat"><div class="label">Net Margin</div><div class="value" style="color:${margin>=0?'#4ade80':'#f87171'}">${fmt(margin)}</div></div>
+        <div class="hero-stat"><div class="label">Completion</div><div class="value">${p.completion}%</div></div>
+        <div class="hero-stat"><div class="label">Health</div><div class="value"><span class="health-badge ${h.status}">${h.text}</span></div></div>
+      </div>
+    </div>
+    <!-- Income / Expense clickable -->
+    <div class="kpi-grid" style="grid-template-columns:1fr 1fr;margin-bottom:1.5rem">
+      <div class="kpi-card green clickable animate-in d2" onclick="showTagBreakdown('${p.id}','income')">
+        <div class="kpi-header"><span class="kpi-label">Income Actuals</span><div class="kpi-icon" style="background:rgba(16,185,129,.1);color:#10b981">💰</div></div>
+        <div class="kpi-value" style="color:#10b981">${fmt(p.actualReceipt)}</div>
+        <div class="kpi-sub"><span class="planned">Planned: ${fmt(p.plannedPhaseReceipt)}</span><span style="color:var(--brand-primary);font-size:.7rem;cursor:pointer">Breakdown →</span></div>
+      </div>
+      <div class="kpi-card orange clickable animate-in d2" onclick="showTagBreakdown('${p.id}','expense')">
+        <div class="kpi-header"><span class="kpi-label">Expense Actuals</span><div class="kpi-icon" style="background:rgba(247,127,0,.1);color:#F77F00">📊</div></div>
+        <div class="kpi-value" style="color:#F77F00">${fmt(p.actualExp)}</div>
+        <div class="kpi-sub"><span class="planned">Planned: ${fmt(p.plannedPhaseExp)}</span><span style="color:var(--brand-primary);font-size:.7rem;cursor:pointer">Breakdown →</span></div>
+      </div>
+    </div>
+    <!-- Phase Table with Total -->
+    <div class="card animate-in d3">
+      <div class="card-header"><h3>📊 Phase-wise Estimates vs Actuals</h3></div>
+      <div class="card-body no-pad"><div class="table-scroll">
+        <table class="data-table"><thead><tr><th>Phase</th><th>Est. Receipt</th><th>Act. Receipt</th><th>Rcpt Var</th><th>Est. Expense</th><th>Act. Expense</th><th>Exp Var</th><th>Status</th></tr></thead>
+        <tbody>
+          ${p.phaseWise.map(pw=>{
+            const rV=pw.actR-pw.estR;const eV=pw.actE-pw.estE;const isA=pw.phase===p.phase;
+            const si=pw.phase<p.phase?'✅':pw.phase===p.phase?'🔄':'⏳';
+            return`<tr style="${isA?'background:var(--brand-surface);font-weight:500':''}">
+              <td><span class="phase-badge" style="${isA?'background:var(--brand-primary);color:#fff':''}">P${pw.phase}</span> ${PHASES[pw.phase]}</td>
+              <td class="mono text-right">${fmt(pw.estR)}</td><td class="mono text-right">${fmt(pw.actR)}</td>
+              <td class="mono text-right" style="color:${rV>=0?'var(--success)':'var(--danger)'}">${rV>=0?'+':''}${fmt(rV)}</td>
+              <td class="mono text-right">${fmt(pw.estE)}</td><td class="mono text-right">${fmt(pw.actE)}</td>
+              <td class="mono text-right" style="color:${eV<=0?'var(--success)':'var(--danger)'}">${eV>0?'+':''}${fmt(eV)}</td>
+              <td style="text-align:center">${si}</td></tr>`}).join('')}
+          <tr class="total-row">
+            <td><strong>TOTAL</strong></td>
+            <td class="mono text-right"><strong>${fmt(totER)}</strong></td><td class="mono text-right"><strong>${fmt(totAR)}</strong></td>
+            <td class="mono text-right" style="color:${totAR-totER>=0?'var(--success)':'var(--danger)'}"><strong>${(totAR-totER)>=0?'+':''}${fmt(totAR-totER)}</strong></td>
+            <td class="mono text-right"><strong>${fmt(totEE)}</strong></td><td class="mono text-right"><strong>${fmt(totAE)}</strong></td>
+            <td class="mono text-right" style="color:${totAE-totEE<=0?'var(--success)':'var(--danger)'}"><strong>${(totAE-totEE)>0?'+':''}${fmt(totAE-totEE)}</strong></td>
+            <td></td>
+          </tr>
+        </tbody></table>
+      </div></div>
+    </div>
+    <!-- Health Assessment -->
+    <div class="card animate-in d4" style="margin-top:1.5rem">
+      <div class="card-header"><h3>🩺 Health Assessment — <span class="health-badge ${h.status}">${h.text}</span></h3></div>
+      <div class="card-body">${h.reasons.map(r=>`<div style="display:flex;align-items:center;gap:.6rem;padding:.45rem 0;border-bottom:1px solid #f1f5f9"><span style="color:${h.status==='green'?'var(--success)':h.status==='yellow'?'var(--warning)':h.status==='red'?'var(--danger)':'var(--info)'};font-size:1rem">${h.status==='green'?'✓':'⚠'}</span><span style="font-size:.84rem">${r}</span></div>`).join('')}</div>
+    </div>`;
+}
+
+/* ══════ TAG BREAKDOWN ══════ */
+function showTagBreakdown(pid,type){
+  const p=PROJECTS.find(x=>x.id===pid);if(!p)return;
+  const data=type==='income'?p.incomeBreakdown:p.expenseBreakdown;
+  const total=data.reduce((s,d)=>s+d.amount,0);
+  document.getElementById('tagModalTitle').textContent=p.name+' — '+(type==='income'?'Income':'Expense')+' Breakdown';
+  document.getElementById('tagModalBody').innerHTML=`
+    <div class="chart-container"><canvas id="tagChart"></canvas></div>
+    <div class="tag-list">${data.map(d=>`<div class="tag-item"><div class="tag-color" style="background:${d.color}"></div><div class="tag-name">${d.tag}</div><div class="tag-amount">${fmt(d.amount)}</div><div class="tag-pct">${pct(d.amount,total)}%</div></div>`).join('')}
+    <div class="tag-item" style="border-top:2px solid var(--border-color);font-weight:700"><div class="tag-color" style="background:transparent"></div><div class="tag-name"><strong>Total</strong></div><div class="tag-amount"><strong>${fmt(total)}</strong></div><div class="tag-pct">100%</div></div></div>`;
+  document.getElementById('tagModal').classList.add('show');
+  setTimeout(()=>{const c=document.getElementById('tagChart');if(c)new Chart(c,{type:'doughnut',data:{labels:data.map(d=>d.tag),datasets:[{data:data.map(d=>d.amount),backgroundColor:data.map(d=>d.color),borderWidth:2,borderColor:'#fff'}]},options:{responsive:true,cutout:'60%',plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.label+': '+fmt(ctx.parsed)+' ('+pct(ctx.parsed,total)+'%)'}}}}})},100);
+}
+
+/* ══════ VENDORS ══════ */
+function renderVendors(){
+  const el=document.getElementById('page-vendors');const t=VENDOR_DUES.reduce((s,v)=>s+v.amount,0);
+  const ov=VENDOR_DUES.filter(v=>v.status==='overdue'),ds=VENDOR_DUES.filter(v=>v.status==='due-soon'),up=VENDOR_DUES.filter(v=>v.status==='upcoming');
+  el.innerHTML=`
+    <div class="page-header animate-in d1"><h1>Vendor Dues<small>Total: ${fmt(t)}</small></h1><div class="breadcrumb"><a onclick="showPage('dashboard')">Dashboard</a> / Vendors</div></div>
+    <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:1.5rem">
+      <div class="kpi-card red animate-in d1"><div class="kpi-label">Overdue</div><div class="kpi-value" style="color:var(--danger)">${fmt(ov.reduce((s,v)=>s+v.amount,0))}</div><div class="kpi-sub"><span class="planned">${ov.length} vendors</span></div></div>
+      <div class="kpi-card orange animate-in d2"><div class="kpi-label">Due Soon</div><div class="kpi-value" style="color:var(--warning)">${fmt(ds.reduce((s,v)=>s+v.amount,0))}</div><div class="kpi-sub"><span class="planned">${ds.length} vendors</span></div></div>
+      <div class="kpi-card blue animate-in d3"><div class="kpi-label">Upcoming</div><div class="kpi-value" style="color:var(--info)">${fmt(up.reduce((s,v)=>s+v.amount,0))}</div><div class="kpi-sub"><span class="planned">${up.length} vendors</span></div></div>
+    </div>
+    <div class="card animate-in d3"><div class="card-body no-pad"><div class="table-scroll"><table class="data-table"><thead><tr><th>Vendor</th><th>Project</th><th>Due Date</th><th>Amount</th><th>Status</th></tr></thead>
+    <tbody>${VENDOR_DUES.sort((a,b)=>a.status==='overdue'?-1:1).map(v=>`<tr><td><strong>${v.name}</strong></td><td>${v.project}</td><td class="mono">${v.dueDate}</td><td class="mono text-right">${fmt(v.amount)}</td><td><span class="health-badge ${v.status==='overdue'?'red':v.status==='due-soon'?'yellow':'blue'}">${v.status==='overdue'?'🔴 Overdue':v.status==='due-soon'?'⚠️ Due Soon':'🔵 Upcoming'}</span></td></tr>`).join('')}</tbody></table></div></div></div>`;
+}
+
+/* ══════ RECEIVABLES ══════ */
+function renderReceivables(){
+  const el=document.getElementById('page-receivables');const t=RECEIVABLES.reduce((s,r)=>s+r.amount,0);
+  const ov=RECEIVABLES.filter(r=>r.status==='overdue');
+  el.innerHTML=`
+    <div class="page-header animate-in d1"><h1>Client Receivables<small>Total: ${fmt(t)}</small></h1><div class="breadcrumb"><a onclick="showPage('dashboard')">Dashboard</a> / Receivables</div></div>
+    <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:1.5rem">
+      <div class="kpi-card red animate-in d1"><div class="kpi-label">Overdue</div><div class="kpi-value" style="color:var(--danger)">${fmt(ov.reduce((s,r)=>s+r.amount,0))}</div><div class="kpi-sub"><span class="planned">${ov.length} invoices</span></div></div>
+      <div class="kpi-card green animate-in d2"><div class="kpi-label">Total Receivable</div><div class="kpi-value">${fmt(t)}</div><div class="kpi-sub"><span class="planned">${RECEIVABLES.length} invoices</span></div></div>
+      <div class="kpi-card blue animate-in d3"><div class="kpi-label">Avg Aging</div><div class="kpi-value">${Math.round(RECEIVABLES.reduce((s,r)=>s+r.aging,0)/RECEIVABLES.length)} days</div></div>
+    </div>
+    <div class="card animate-in d3"><div class="card-body no-pad"><div class="table-scroll"><table class="data-table"><thead><tr><th>Client</th><th>Project</th><th>Invoice</th><th>Due Date</th><th>Amount</th><th>Aging</th><th>Status</th></tr></thead>
+    <tbody>${RECEIVABLES.sort((a,b)=>b.aging-a.aging).map(r=>`<tr><td><strong>${r.client}</strong></td><td>${r.project}</td><td class="mono" style="font-size:.73rem">${r.invoice}</td><td class="mono">${r.dueDate}</td><td class="mono text-right">${fmt(r.amount)}</td><td class="mono text-right">${r.aging>0?r.aging+'d':'—'}</td><td><span class="health-badge ${r.status==='overdue'?'red':r.status==='due-soon'?'yellow':'blue'}">${r.status==='overdue'?'🔴 Overdue':r.status==='due-soon'?'⚠️ Due Soon':'🔵 Upcoming'}</span></td></tr>`).join('')}</tbody></table></div></div></div>`;
+}
+
+/* ══════ MODALS ══════ */
+function closeModal(id){document.getElementById(id).classList.remove('show')}
+document.getElementById('tagModal').addEventListener('click',function(e){if(e.target===this)closeModal('tagModal')});
+document.getElementById('profileModal').addEventListener('click',function(e){if(e.target===this)closeModal('profileModal')});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal('tagModal');closeModal('profileModal')}});
+</script>
+</body>
+</html>
